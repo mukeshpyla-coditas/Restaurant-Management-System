@@ -1,6 +1,9 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
+import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,16 +26,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "invitation_token")
-public class InvitationToken {
+public class Invitation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String inviteCode;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private Users user;
+    private Users sentBy;
+
+    @Enumerated(EnumType.STRING)
+    private InviteStatus inviteStatus;
 
     private LocalDate issuedAt;
     private LocalDate expirationTime;

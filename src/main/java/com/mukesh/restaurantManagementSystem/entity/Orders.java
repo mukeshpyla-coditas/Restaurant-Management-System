@@ -34,7 +34,7 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "waiter_id", referencedColumnName = "id")
     private Staff waiterStaff;
 

@@ -38,4 +38,6 @@ public class Managers {
 
     @OneToMany(mappedBy = "manager")
     private List<Staff> staffList;
+
+    private Double salary;
 }

@@ -47,7 +47,7 @@ public class Users implements UserDetails {
     private Role role;
     private Boolean isActive;
     private String photoUrl;
-    private LocalDate createdAt;
+    private LocalDate joinedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

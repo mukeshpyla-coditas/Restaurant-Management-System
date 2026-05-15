@@ -38,13 +38,15 @@ public class Staff {
     @OneToOne
     private Users user;
 
-    private LocalDate joinedAt;
     private Boolean isActive;
     private Double salary;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id", referencedColumnName = "id")
     private Managers manager;
+
+    @OneToMany(mappedBy = "waiterStaff")
+    private List<Orders> ordersList;
 
     @OneToMany(mappedBy = "assignedWaiter")
     private List<RestaurantTables> assignedTables;
