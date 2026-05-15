@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,25 +22,18 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "branches")
-public class Branches {
+@Table(name = "invitation_token")
+public class InvitationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String branchName;
-    private String address;
-    private Long seatingCapacity;
-    private LocalDate createdAt;
-    private String contactNumber;
+    private String inviteCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
-    private Restaurants restaurant;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private Users user;
 
-    @OneToOne(mappedBy = "branch")
-    private Managers manager;
-
-    @OneToOne
-    private Menu menu;
+    private LocalDate issuedAt;
+    private LocalDate expirationTime;
 }

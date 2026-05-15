@@ -1,6 +1,9 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
+import com.mukesh.restaurantManagementSystem.enums.TableStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +27,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "staff")
-public class Staff {
+@Table(name = "restaurant_tables")
+public class RestaurantTables {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,20 +37,18 @@ public class Staff {
     @JoinColumn(name = "branch_id", referencedColumnName = "id")
     private Branches branch;
 
-    @OneToOne
-    private Users user;
+    private Integer tableNumber;
+    private Integer seatingCapacity;
 
-    private LocalDate joinedAt;
-    private Boolean isActive;
-    private Double salary;
+    @Enumerated(EnumType.STRING)
+    private TableStatus tableStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id", referencedColumnName = "id")
-    private Managers manager;
+    @JoinColumn(name = "assigned_waiter_id", referencedColumnName = "id")
+    private Staff assignedWaiter;
 
-    @OneToMany(mappedBy = "assignedWaiter")
-    private List<RestaurantTables> assignedTables;
+    private LocalDate createdAt;
 
-    @OneToMany(mappedBy = "stockManagementStaff")
-    private List<PurchaseBills> purchaseBillsList;
+    @OneToMany(mappedBy = "restaurantTable")
+    private List<Orders> ordersList;
 }

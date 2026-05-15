@@ -15,33 +15,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Entity
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "branches")
-public class Branches {
+@Table(name = "order_items")
+public class OrderItems {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String branchName;
-    private String address;
-    private Long seatingCapacity;
-    private LocalDate createdAt;
-    private String contactNumber;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
-    private Restaurants restaurant;
-
-    @OneToOne(mappedBy = "branch")
-    private Managers manager;
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private Orders order;
 
     @OneToOne
-    private Menu menu;
+    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    private FoodItems item;
+
+    private Integer quantity;
 }

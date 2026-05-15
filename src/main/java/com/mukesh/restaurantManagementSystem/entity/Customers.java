@@ -4,9 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,16 +20,15 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "owners")
-public class Owners {
+@Table(name = "customers")
+public class Customers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-    private Users owner;
+    private String customerName;
+    private String contactNumber;
 
-    @OneToMany(mappedBy = "owner")
-    private List<Restaurants> restaurantsList;
+    @OneToMany(mappedBy = "customer")
+    private List<Orders> ordersList;
 }
