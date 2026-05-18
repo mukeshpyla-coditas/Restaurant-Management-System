@@ -37,6 +37,7 @@ public class FoodItems {
     private String imageUrl;
     private LocalDate createdAt;
     private String ingredients;
+    private String preparationNotes;
     private Double calories;
     private Double price;
 

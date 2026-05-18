@@ -1,11 +1,11 @@
 package com.mukesh.restaurantManagementSystem.controller;
 
 import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerLoginRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerRegisterRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.UserInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerLoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.UserInviteResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwnerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class ApplicationOwnerController {
     private final ApplicationOwnerService applicationOwnerService;
 
     @PostMapping("/invite")
-    public ResponseEntity<UserInviteResponseDTO> inviteRestaurantOwner(@RequestBody @Valid UserInviteRequestDTO request) {
+    public ResponseEntity<RestaurantOwnerInviteResponseDTO> inviteRestaurantOwner(@RequestBody @Valid RestaurantOwnerInviteRequestDTO request) {
         return ResponseEntity.ok(applicationOwnerService.inviteUser(request));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApplicationOwnerRegisterResponseDTO> registerApplicationOwner(@RequestBody @Valid ApplicationOwnerRegisterRequestDTO request) {
+    public ResponseEntity<ApplicationOwnerRegisterResponseDTO> registerApplicationOwner(@RequestBody @Valid RegisterRequestDTO request) {
         return ResponseEntity.ok(applicationOwnerService.registerApplicationOwner(request));
     }
 

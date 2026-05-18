@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInviteRequestDTO {
+public class RestaurantOwnerInviteRequestDTO {
     @NonNull
     private Long senderId;
 

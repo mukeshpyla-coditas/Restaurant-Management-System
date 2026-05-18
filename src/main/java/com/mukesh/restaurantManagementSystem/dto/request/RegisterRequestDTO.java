@@ -10,28 +10,24 @@ import org.springframework.format.annotation.NumberFormat;
 
 @Setter
 @Getter
-public class RestaurantOwnerRegisterRequestDTO {
+public class RegisterRequestDTO {
     @NotNull
     private String fullName;
     @NotNull
     private String username;
     @Email
     private String email;
-    @Size(min = 6, max = 8)
+    @Size(min = 6, max = 8, message = "Password must be of [6, 8] size.")
     private String password;
-
     @Pattern(regexp = "MALE|FEMALE|OTHERS")
     private String gender;
-
     @NotNull
     @NumberFormat(style = NumberFormat.Style.NUMBER)
     @Size(min = 12, max = 12, message = "Aadhar Number must be of 12 characters.")
     private String aadharNumber;
-
     @NotNull
     @NumberFormat(style = NumberFormat.Style.NUMBER)
     @Size(min = 10, max = 10, message = "Contact Number must be of 10 characters.")
     private String contactNumber;
-
     private String photoUrl;
 }

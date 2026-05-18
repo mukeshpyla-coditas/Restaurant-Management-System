@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @Builder
-public class UserInviteResponseDTO {
+public class RestaurantOwnerInviteResponseDTO {
     @NonNull
     @Email
     private String sentTo;

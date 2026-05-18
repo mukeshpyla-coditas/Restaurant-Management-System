@@ -1,11 +1,11 @@
 package com.mukesh.restaurantManagementSystem.service.implementations;
 
 import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerLoginRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerRegisterRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.UserInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerLoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.UserInviteResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
 import com.mukesh.restaurantManagementSystem.entity.RefreshToken;
 import com.mukesh.restaurantManagementSystem.entity.Users;
@@ -19,11 +19,8 @@ import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwner
 import com.mukesh.restaurantManagementSystem.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +40,7 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
-    public UserInviteResponseDTO inviteUser(UserInviteRequestDTO request) {
+    public RestaurantOwnerInviteResponseDTO inviteUser(RestaurantOwnerInviteRequestDTO request) {
         Users sender = usersRepository.findById(request.getSenderId())
                 .orElseThrow(() -> new EntityNotFoundException("User specified does not exist"));
 
@@ -60,14 +57,14 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
                 .build();
         invitationRepository.save(invitation);
 
-        return UserInviteResponseDTO.builder()
+        return RestaurantOwnerInviteResponseDTO.builder()
                 .sentTo(request.getReceiverEmail())
                 .message("Mail is successfully sent")
                 .build();
     }
 
     @Override
-    public ApplicationOwnerRegisterResponseDTO registerApplicationOwner(ApplicationOwnerRegisterRequestDTO request) {
+    public ApplicationOwnerRegisterResponseDTO registerApplicationOwner(RegisterRequestDTO request) {
         Users applicationOwner = Users.builder()
                 .fullName(request.getFullName())
                 .username(request.getUsername())

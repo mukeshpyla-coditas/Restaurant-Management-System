@@ -10,7 +10,7 @@ import org.springframework.format.annotation.NumberFormat;
 
 @Setter
 @Getter
-public class ApplicationOwnerRegisterRequestDTO {
+public class AddStaffRequestDTO {
     @NotNull
     private String fullName;
     @NotNull
@@ -19,7 +19,7 @@ public class ApplicationOwnerRegisterRequestDTO {
     private String email;
     @Size(min = 6, max = 8)
     private String password;
-    @Pattern(regexp = "MALE|FEMALE|OTHERS")
+    @Pattern(regexp = "MALE|FEMALE|OTHERS", message = "Please select the valid genderType.")
     private String gender;
     @NotNull
     @NumberFormat(style = NumberFormat.Style.NUMBER)
@@ -29,5 +29,8 @@ public class ApplicationOwnerRegisterRequestDTO {
     @NumberFormat(style = NumberFormat.Style.NUMBER)
     @Size(min = 10, max = 10, message = "Contact Number must be of 10 characters.")
     private String contactNumber;
+    @NotNull
     private String photoUrl;
+    @Pattern(regexp = "WAITER_STAFF|COOKING_STAFF|STOCK_MANAGEMENT_STAFF", message = "Please select the valid staffType.")
+    private String staffType;
 }

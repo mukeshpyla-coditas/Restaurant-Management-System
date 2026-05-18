@@ -2,7 +2,7 @@ package com.mukesh.restaurantManagementSystem.controller;
 
 import com.mukesh.restaurantManagementSystem.dto.request.BranchManagerInviteRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.BranchRegisterRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerRegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantRegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchManagerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchRegisterResponseDTO;
@@ -26,7 +26,7 @@ public class RestaurantOwnerController {
 
     @PostMapping("/register/{inviteCode}")
     public ResponseEntity<RestaurantOwnerRegisterResponseDTO> registerRestaurantOwner(@PathVariable(name = "inviteCode") String inviteCode,
-                                                                                      @RequestBody @Valid RestaurantOwnerRegisterRequestDTO request) {
+                                                                                      @RequestBody @Valid RegisterRequestDTO request) {
         return ResponseEntity.ok(restaurantOwnerService.registerOwner(inviteCode, request));
     }
 

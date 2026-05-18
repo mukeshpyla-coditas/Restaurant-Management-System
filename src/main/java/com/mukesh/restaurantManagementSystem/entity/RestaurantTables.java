@@ -1,6 +1,7 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
 import com.mukesh.restaurantManagementSystem.enums.TableStatus;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,6 +38,7 @@ public class RestaurantTables {
     @JoinColumn(name = "branch_id", referencedColumnName = "id")
     private Branches branch;
 
+    @Column(unique = true)
     private Integer tableNumber;
     private Integer seatingCapacity;
 

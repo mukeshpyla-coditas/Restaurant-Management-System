@@ -1,12 +1,13 @@
 package com.mukesh.restaurantManagementSystem.service.implementations;
 
 import com.mukesh.restaurantManagementSystem.dto.request.BranchManagerInviteRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.UserInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.Gender;
 import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
 import com.mukesh.restaurantManagementSystem.enums.RestaurantType;
+import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.exceptions.InvalidTypeException;
 import com.mukesh.restaurantManagementSystem.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,15 @@ public class CommonServiceImpl {
         throw new InvalidTypeException("Please enter valid restaurant type: ['LUXURY', 'GENERAL']");
     }
 
-    public void sendMail(UserInviteRequestDTO request, Users sender, String apiCall) {
+    public Role checkStaffType(String requestedStaffType) {
+        for(Role staffType : Role.values()) {
+            if(staffType.name().equals(requestedStaffType.toUpperCase())) return staffType;
+        }
+
+        throw new InvalidTypeException("Please enter valid staffType: ['WAITER_STAFF', 'COOKING_STAFF', 'STOCK_MANAGEMENT_STAFF']");
+    }
+
+    public void sendMail(RestaurantOwnerInviteRequestDTO request, Users sender, String apiCall) {
         String restaurantOwnerRegistrationLink = "https://playtime-sanitary-nutcase.ngrok-free.dev" + apiCall;
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(request.getReceiverEmail());
@@ -54,7 +63,7 @@ public class CommonServiceImpl {
         simpleMailMessage.setTo(request.getReceiverMail());
         simpleMailMessage.setSubject("Invite to onboard onto the Management Application");
         simpleMailMessage.setFrom(sender.getEmail());
-        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nPlease NOTE that the link will be active until next 12hrs. Please do register before the expiry. Thank you!");
+        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nBranchId: " + request.getBranchId() + "\nPlease NOTE that the link will be active until next 12hrs. Please do register before the expiry. Thank you!");
         javaMailSender.send(simpleMailMessage);
     }
 

@@ -2,15 +2,15 @@ package com.mukesh.restaurantManagementSystem.service.implementations;
 
 import com.mukesh.restaurantManagementSystem.dto.request.BranchManagerInviteRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.BranchRegisterRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerRegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantRegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchManagerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantRegisterResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.UserInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
+import com.mukesh.restaurantManagementSystem.entity.Managers;
 import com.mukesh.restaurantManagementSystem.entity.Owners;
 import com.mukesh.restaurantManagementSystem.entity.Restaurants;
 import com.mukesh.restaurantManagementSystem.entity.Users;
@@ -45,7 +45,7 @@ public class RestaurantOwnerServiceImpl implements RestaurantOwnerService {
     private final RestaurantOwnerRepository restaurantOwnerRepository;
 
     @Override
-    public RestaurantOwnerRegisterResponseDTO registerOwner(String inviteCode, RestaurantOwnerRegisterRequestDTO request) {
+    public RestaurantOwnerRegisterResponseDTO registerOwner(String inviteCode, RegisterRequestDTO request) {
         if(!commonService.isInviteTokenValid(inviteCode)) {
             throw new CodeExpiredException("InviteCode is expired. Please wait for the next invite mail.");
         }
@@ -142,7 +142,6 @@ public class RestaurantOwnerServiceImpl implements RestaurantOwnerService {
     public BranchManagerInviteResponseDTO inviteBranchManager(BranchManagerInviteRequestDTO request) {
         Owners sender = restaurantOwnerRepository.findById(request.getSenderId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified user does not exist. Please re-verify the senderId."));
-
         String inviteCode = UUID.randomUUID().toString();
         String apiCall = "/v1/branch-manager/register/" + inviteCode;
         commonService.sendMail(request, sender.getOwner(), apiCall);
