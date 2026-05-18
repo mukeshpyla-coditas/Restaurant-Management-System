@@ -1,7 +1,9 @@
 package com.mukesh.restaurantManagementSystem.controller;
 
+import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerLoginRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerRegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.UserInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerLoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.UserInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwnerService;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/auth")
+@RequestMapping("/v1/application-owner")
 @RequiredArgsConstructor
 public class ApplicationOwnerController {
     private final ApplicationOwnerService applicationOwnerService;
@@ -27,5 +29,10 @@ public class ApplicationOwnerController {
     @PostMapping("/register")
     public ResponseEntity<ApplicationOwnerRegisterResponseDTO> registerApplicationOwner(@RequestBody @Valid ApplicationOwnerRegisterRequestDTO request) {
         return ResponseEntity.ok(applicationOwnerService.registerApplicationOwner(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApplicationOwnerLoginResponseDTO> loginApplicationOwner(@RequestBody @Valid ApplicationOwnerLoginRequestDTO request) {
+        return ResponseEntity.ok(applicationOwnerService.loginApplicationOwner(request));
     }
 }

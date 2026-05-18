@@ -35,7 +35,6 @@ import java.util.UUID;
 @Slf4j
 public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
     private final JwtUtil jwtUtil;
-    private final JavaMailSender javaMailSender;
     private final UsersRepository usersRepository;
     private final CommonServiceImpl commonService;
     private final PasswordEncoder passwordEncoder;
@@ -45,16 +44,13 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
 
     @Override
     public UserInviteResponseDTO inviteUser(UserInviteRequestDTO request) {
-        Users sender = usersRepository.findById(request.getSenderId()).orElseThrow(() -> new EntityNotFoundException("User specified does not exist"));
-
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setTo(request.getReceiverEmail());
-        simpleMailMessage.setSubject("Invite to onboard onto the Management Application");
-        simpleMailMessage.setFrom(sender.getEmail());
-        simpleMailMessage.setText("Please NOTE that the link will be active until next 12hrs. Please do register before the expiry. Thank you!");
-        javaMailSender.send(simpleMailMessage);
+        Users sender = usersRepository.findById(request.getSenderId())
+                .orElseThrow(() -> new EntityNotFoundException("User specified does not exist"));
 
         String inviteCode = UUID.randomUUID().toString();
+        String apiCall = "/v1/restaurant-owner/register/" + inviteCode;
+        commonService.sendMail(request, sender, apiCall);
+        
         Invitation invitation = Invitation.builder()
                 .inviteCode(inviteCode)
                 .issuedAt(LocalDate.now())
