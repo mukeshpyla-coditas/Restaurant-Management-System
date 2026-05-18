@@ -13,4 +13,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> errorResponse(EntityNotFoundException exception) {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidTypeException.class)
+    public ResponseEntity<ErrorResponse> errorResponse(InvalidTypeException exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
+    }
 }

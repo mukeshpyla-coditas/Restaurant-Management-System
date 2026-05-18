@@ -48,6 +48,7 @@ public class Users implements UserDetails {
     private Boolean isActive;
     private String photoUrl;
     private LocalDate joinedAt;
+    private String contactNumber;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
