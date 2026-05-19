@@ -4,14 +4,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Setter
 @Getter
-public class AssignStaffRequestDTO {
+public class ViewReportsRequestDTO {
     @NotNull
-    private Long waiterStaffId;
-
+    private Long branchId;
     @NotNull
-    private List<Long> tableNumbers;
+    private LocalDate from;
+    @NotNull
+    private LocalDate to;
 }

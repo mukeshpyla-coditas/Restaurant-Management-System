@@ -38,6 +38,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(NotAssignedException.class)
+    public ResponseEntity<ErrorResponse> errorResponse(NotAssignedException exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SessionExpirationException.class)
+    public ResponseEntity<ErrorResponse> errorResponse(SessionExpirationException exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> errorResponse(MethodArgumentNotValidException exception) {
         Map<String, String> errorsMap = new HashMap<>();

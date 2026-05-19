@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Setter
@@ -21,17 +20,18 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "bills")
-public class Bills {
+@Table(name = "daily_reports")
+public class DailyReports {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private Orders order;
-
-    private Double taxPercentage;
-
-    private Double totalBillAmount;
+    private Long branchId;
+    private Double totalIncome;
+    private Double totalExpenditure;
+    private Integer totalOrders;
+    private Double totalProfit;
+    private Double profitPercentage;
+    private LocalDate reportDate;
+    private LocalDateTime generatedAt;
 }

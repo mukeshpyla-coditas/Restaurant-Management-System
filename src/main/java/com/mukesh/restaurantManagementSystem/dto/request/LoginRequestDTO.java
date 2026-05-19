@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class ApplicationOwnerLoginRequestDTO {
+public class LoginRequestDTO {
     @NotNull
     private String username;
 

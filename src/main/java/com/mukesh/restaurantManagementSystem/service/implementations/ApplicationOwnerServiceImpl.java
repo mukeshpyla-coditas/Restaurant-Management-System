@@ -1,9 +1,9 @@
 package com.mukesh.restaurantManagementSystem.service.implementations;
 
-import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerLoginRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.LoginRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerLoginResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.LoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
@@ -89,7 +89,7 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
     }
 
     @Override
-    public ApplicationOwnerLoginResponseDTO loginApplicationOwner(ApplicationOwnerLoginRequestDTO request) {
+    public LoginResponseDTO loginApplicationOwner(LoginRequestDTO request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -104,7 +104,7 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
                     .build();
             refreshTokenRepository.save(refreshToken1);
 
-            return ApplicationOwnerLoginResponseDTO.builder()
+            return LoginResponseDTO.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .message("The token will be active for next 10min.")

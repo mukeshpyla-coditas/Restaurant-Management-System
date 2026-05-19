@@ -45,9 +45,8 @@ public class RestaurantTables {
     @Enumerated(EnumType.STRING)
     private TableStatus tableStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_waiter_id", referencedColumnName = "id")
-    private Staff assignedWaiter;
+    @OneToMany(mappedBy = "assignedTables")
+    private List<TableAssignments> assignments;
 
     private LocalDate createdAt;
 

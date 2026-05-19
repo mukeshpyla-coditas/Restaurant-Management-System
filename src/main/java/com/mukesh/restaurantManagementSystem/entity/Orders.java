@@ -1,6 +1,7 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
 import com.mukesh.restaurantManagementSystem.enums.OrderStatus;
+import com.mukesh.restaurantManagementSystem.enums.PaymentStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,7 +42,7 @@ public class Orders {
     private List<OrderItems> orderItemsList;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    private PaymentStatus paymentStatus;
 
     private LocalDate placedAt;
 

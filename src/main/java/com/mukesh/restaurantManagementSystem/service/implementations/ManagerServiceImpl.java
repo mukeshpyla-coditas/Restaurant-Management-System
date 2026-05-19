@@ -4,14 +4,13 @@ import com.mukesh.restaurantManagementSystem.dto.request.AddCategoryRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddFoodItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddStaffRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddTableRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.AssignStaffRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.AssignmentRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.ManagerRegisterRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddCategoryResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.AssignStaffResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Branches;
@@ -21,6 +20,7 @@ import com.mukesh.restaurantManagementSystem.entity.Menu;
 import com.mukesh.restaurantManagementSystem.entity.MenuCategory;
 import com.mukesh.restaurantManagementSystem.entity.RestaurantTables;
 import com.mukesh.restaurantManagementSystem.entity.Staff;
+import com.mukesh.restaurantManagementSystem.entity.TableAssignments;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.enums.TableStatus;
@@ -34,6 +34,7 @@ import com.mukesh.restaurantManagementSystem.repository.ManagerRepository;
 import com.mukesh.restaurantManagementSystem.repository.MenuCategoryRepository;
 import com.mukesh.restaurantManagementSystem.repository.MenuRepository;
 import com.mukesh.restaurantManagementSystem.repository.StaffRepository;
+import com.mukesh.restaurantManagementSystem.repository.TableAssignmentsRepository;
 import com.mukesh.restaurantManagementSystem.repository.TablesRepository;
 import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
@@ -44,6 +45,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +64,7 @@ public class ManagerServiceImpl implements ManagerService {
     private final FoodItemsRepository foodItemsRepository;
     private final ManagerRepository managerRepository;
     private final MenuCategoryRepository categoryRepository;
+    private final TableAssignmentsRepository tableAssignmentsRepository;
 
     @Override
     public ManagerRegisterResponseDTO registerManager(String inviteCode, ManagerRegisterRequestDTO request) {
@@ -257,30 +263,77 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public AssignStaffResponseDTO assignStaff(AssignStaffRequestDTO request) {
+    public AssignmentResponseDTO assignStaff(AssignmentRequestDTO request) {
         Managers existingManager = getManager();
-        Staff existingStaff = staffRepository.findById(request.getWaiterStaffId())
+        Staff waiterStaff = staffRepository.findById(request.getWaiterId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified staff does not found. Please re-confirm the staffId."));
-        if(!existingStaff.getUser().getRole().equals(Role.WAITER_STAFF)) {
+        if(!waiterStaff.getUser().getRole().equals(Role.WAITER_STAFF)) {
             throw new BadRequestException("Specified staff is not waiter-staff. Tables can only be assigned to WAITER_STAFF. Please re-confirm the staffId.");
         }
-        for(Long tableNumber : request.getTableNumbers()) {
-            RestaurantTables existingTable = tablesRepository.findById(tableNumber)
-                    .orElseThrow(() -> new EntityNotFoundException("Specified table does not exist. Please re-confirm the tableNumber."));
-            existingStaff.getAssignedTables().add(existingTable);
-            existingTable.setAssignedWaiter(existingStaff);
-            tablesRepository.save(existingTable);
-            log.info("Assigned tableNumber {} to {}", existingTable.getTableNumber(), existingStaff.getUser().getFullName());
+
+        Map<Long, List<Integer>> assignments = new HashMap<>();
+        List<Integer> tablesList = new ArrayList<>();
+
+        for(Long tableId : request.getSelectedTables()) {
+            RestaurantTables requestedTable = tablesRepository.findById(tableId)
+                    .orElseThrow(() -> new EntityNotFoundException("Specified tableId does not exist. Please do re-verify the selected table IDs."));
+            TableAssignments newAssignment = TableAssignments.builder()
+                    .temporaryAssignment(false)
+                    .assignedTables(requestedTable)
+                    .assignedBy(existingManager)
+                    .startTime(LocalDate.now())
+                    .endTime(LocalDate.now().plusDays(1))
+                    .waiter(waiterStaff)
+                    .build();
+            tableAssignmentsRepository.save(newAssignment);
+
+            tablesList.add(requestedTable.getTableNumber());
+
+            requestedTable.getAssignments().add(newAssignment);
         }
 
-        staffRepository.save(existingStaff);
-        log.info("Added assigned tables to the waiter staff's 'Assigned Tables' list.");
+        assignments.put(waiterStaff.getId(), tablesList);
 
-        return AssignStaffResponseDTO.builder()
-                .tablesAssigned(request.getTableNumbers())
-                .staffId(existingStaff.getId())
-                .staffName(existingStaff.getUser().getFullName())
-                .assignedBy(existingManager.getUser().getFullName())
+        return AssignmentResponseDTO.builder()
+                .temporaryAssignment(false)
+                .assignedTables(assignments)
+                .message("The waiter with ID: " + waiterStaff.getId() + " is assigned to the mentioned tables.")
+                .build();
+
+    }
+
+    @Override
+    public AssignmentResponseDTO temporaryAssignment(AssignmentRequestDTO request) {
+        Managers existingManger = getManager();
+        Staff waiterStaff = staffRepository.findById(request.getWaiterId())
+                .orElseThrow(() -> new EntityNotFoundException("Specified waiter does not exist."));
+        Map<Long, List<Integer>> assignments = new HashMap<>();
+        List<Integer> tablesList = new ArrayList<>();
+
+        for(Long tableId : request.getSelectedTables()) {
+            RestaurantTables requestedTable = tablesRepository.findById(tableId)
+                    .orElseThrow(() -> new EntityNotFoundException("Specified tableId does not exist. Please do re-verify the selected table IDs."));
+            TableAssignments newAssignment = TableAssignments.builder()
+                    .temporaryAssignment(true)
+                    .assignedTables(requestedTable)
+                    .assignedBy(existingManger)
+                    .startTime(LocalDate.now())
+                    .endTime(LocalDate.now().plusDays(1))
+                    .waiter(waiterStaff)
+                    .build();
+            tableAssignmentsRepository.save(newAssignment);
+
+            tablesList.add(requestedTable.getTableNumber());
+
+            requestedTable.getAssignments().add(newAssignment);
+        }
+
+        assignments.put(waiterStaff.getId(), tablesList);
+
+        return AssignmentResponseDTO.builder()
+                .temporaryAssignment(true)
+                .assignedTables(assignments)
+                .message("The waiter with ID: " + waiterStaff.getId() + " is assigned to the mentioned tables.")
                 .build();
     }
 

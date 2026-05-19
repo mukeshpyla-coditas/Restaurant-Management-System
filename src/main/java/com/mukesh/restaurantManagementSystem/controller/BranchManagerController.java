@@ -4,13 +4,13 @@ import com.mukesh.restaurantManagementSystem.dto.request.AddCategoryRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddFoodItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddStaffRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddTableRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.request.AssignStaffRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.AssignmentRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.ManagerRegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddCategoryResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.AssignStaffResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
@@ -61,8 +61,13 @@ public class BranchManagerController {
     }
 
     @PostMapping("/assign-staff")
-    public ResponseEntity<AssignStaffResponseDTO> assignStaff(@RequestBody @Valid AssignStaffRequestDTO request) {
+    public ResponseEntity<AssignmentResponseDTO> assignStaff(@RequestBody @Valid AssignmentRequestDTO request) {
         return ResponseEntity.ok(managerService.assignStaff(request));
+    }
+
+    @PostMapping("/temporary-assignment")
+    public ResponseEntity<AssignmentResponseDTO> temporaryAssignment(@RequestBody @Valid AssignmentRequestDTO request) {
+        return ResponseEntity.accepted().body(managerService.temporaryAssignment(request));
     }
 
 }

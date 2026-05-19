@@ -1,9 +1,7 @@
 package com.mukesh.restaurantManagementSystem.controller;
 
-import com.mukesh.restaurantManagementSystem.dto.request.ApplicationOwnerLoginRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerLoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwnerService;
@@ -29,10 +27,5 @@ public class ApplicationOwnerController {
     @PostMapping("/register")
     public ResponseEntity<ApplicationOwnerRegisterResponseDTO> registerApplicationOwner(@RequestBody @Valid RegisterRequestDTO request) {
         return ResponseEntity.ok(applicationOwnerService.registerApplicationOwner(request));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<ApplicationOwnerLoginResponseDTO> loginApplicationOwner(@RequestBody @Valid ApplicationOwnerLoginRequestDTO request) {
-        return ResponseEntity.ok(applicationOwnerService.loginApplicationOwner(request));
     }
 }
