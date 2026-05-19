@@ -5,6 +5,8 @@ import com.mukesh.restaurantManagementSystem.dto.response.ReportResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ViewReportsResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.DailyReports;
+import com.mukesh.restaurantManagementSystem.entity.Managers;
+import com.mukesh.restaurantManagementSystem.entity.Owners;
 import com.mukesh.restaurantManagementSystem.repository.BillsRepository;
 import com.mukesh.restaurantManagementSystem.repository.BranchRepository;
 import com.mukesh.restaurantManagementSystem.repository.DailyReportRepository;
@@ -27,6 +29,7 @@ public class DailyReportServiceImpl implements DailyReportService {
     private final PurchaseBillsRepository purchaseBillsRepository;
     private final DailyReportRepository dailyReportRepository;
     private final BranchRepository branchRepository;
+    private final CommonServiceImpl commonService;
 
     @Override
     @Scheduled(cron = "0 0 5 * * *")
@@ -55,6 +58,14 @@ public class DailyReportServiceImpl implements DailyReportService {
                     .build();
 
             dailyReportRepository.save(dailyReports);
+            log.info("Saved the daily report for the date: {}", dailyReports.getReportDate());
+
+            Managers branchManager = branch.getManager();
+            commonService.sendMail(dailyReports, branchManager.getUser().getEmail());
+            log.info("Sent mail to the manager: {}", branchManager.getUser().getFullName());
+            Owners restaurantOwner = branch.getRestaurant().getOwner();
+            commonService.sendMail(dailyReports, restaurantOwner.getOwner().getEmail());
+            log.info("Sent mail to the restaurant owner: {}", restaurantOwner.getOwner().getFullName());
         }
     }
 

@@ -1,8 +1,10 @@
 package com.mukesh.restaurantManagementSystem.service.implementations;
 
 import com.mukesh.restaurantManagementSystem.dto.request.AddItemsToExistingOrderRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.CancelOrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.OrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddItemsToExistingOrderResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.CancelOrderItemResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.OrderItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ViewMenuResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Customers;
@@ -12,10 +14,12 @@ import com.mukesh.restaurantManagementSystem.entity.OrderItems;
 import com.mukesh.restaurantManagementSystem.entity.Orders;
 import com.mukesh.restaurantManagementSystem.entity.RestaurantTables;
 import com.mukesh.restaurantManagementSystem.entity.Staff;
+import com.mukesh.restaurantManagementSystem.entity.TableAssignments;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.OrderStatus;
 import com.mukesh.restaurantManagementSystem.enums.PaymentStatus;
 import com.mukesh.restaurantManagementSystem.exceptions.EntityNotFoundException;
+import com.mukesh.restaurantManagementSystem.exceptions.InvalidTypeException;
 import com.mukesh.restaurantManagementSystem.exceptions.NotAssignedException;
 import com.mukesh.restaurantManagementSystem.exceptions.SessionExpirationException;
 import com.mukesh.restaurantManagementSystem.repository.CustomersRepository;
@@ -52,18 +56,18 @@ public class WaiterStaffServiceImpl implements WaiterStaffService {
     public List<Integer> viewAssignedTables() {
         Staff existingStaff = getWaiterStaff();
 
-        List<RestaurantTables> restaurantTablesList = existingStaff.getAssignedTables();
-        if(restaurantTablesList == null) {
+        List<TableAssignments> assignedTables = existingStaff.getAssignedTables();
+        if(assignedTables == null) {
             throw new NotAssignedException("Specified staff is not assigned to any tables yet.");
         }
 
-        List<Integer> assignedTables = new ArrayList<>();
+        List<Integer> tables = new ArrayList<>();
 
-        for(RestaurantTables restaurantTable : restaurantTablesList) {
-            assignedTables.add(restaurantTable.getTableNumber());
+        for(TableAssignments assignment : assignedTables) {
+            tables.add(assignment.getAssignedTables().getTableNumber());
         }
 
-        return assignedTables;
+        return tables;
     }
 
     @Override
@@ -126,7 +130,7 @@ public class WaiterStaffServiceImpl implements WaiterStaffService {
         }
 
         newOrder.setOrderItemsList(orderItemsList);
-        newOrder.setOrderStatus(OrderStatus.ORDER_PLACED);
+        newOrder.setPaymentStatus(PaymentStatus.PENDING);
         ordersRepository.save(newOrder);
 
         orderItemsList.forEach(orderItems -> orderItems.setOrder(newOrder));
@@ -169,6 +173,36 @@ public class WaiterStaffServiceImpl implements WaiterStaffService {
                 .orderId(existingOrder.getId())
                 .foodItemId(foodItem.getId())
                 .foodItemName(foodItem.getItemName())
+                .build();
+    }
+
+    @Override
+    public CancelOrderItemResponseDTO cancelOrderItems(CancelOrderItemsRequestDTO request) {
+        Orders activeOrder = ordersRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("There is not order found with specified orderId."));
+        if(activeOrder.getPaymentStatus().equals(PaymentStatus.COMPLETED)) {
+            throw new SessionExpirationException("Specified order is already completed(payment is done). Please re-confirm the orderId.");
+        }
+        OrderItems requestedOrderItem = orderItemsRepository.findById(request.getItemId())
+                .orElseThrow(() -> new EntityNotFoundException("Specified orderItemId does not exist. Please re-confirm the orderItemId."));
+
+        boolean flag = false;
+        Map<String, Integer> remainingOrderItems = new HashMap<>();
+        for(OrderItems activeOrderItems : activeOrder.getOrderItemsList()) {
+            remainingOrderItems.put(activeOrderItems.getItem().getItemName(), activeOrderItems.getQuantity());
+            if(activeOrderItems.equals(requestedOrderItem)) {
+                flag = true;
+            }
+        }
+
+        if(!flag) throw new InvalidTypeException("Specified orderItem is not part of specified order. Please re-verify the order and orderItem IDs.");
+
+        requestedOrderItem.setOrderStatus(OrderStatus.CANCELLED);
+        orderItemsRepository.save(requestedOrderItem);
+
+        return CancelOrderItemResponseDTO.builder()
+                .remainingOrders(remainingOrderItems)
+                .message("Specified orderItem with ID: " + request.getItemId() + " is successfully cancelled. Thank you!")
                 .build();
     }
 

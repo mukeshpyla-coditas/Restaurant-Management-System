@@ -6,6 +6,7 @@ import com.mukesh.restaurantManagementSystem.dto.request.AddStaffRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddTableRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AssignmentRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.ManagerRegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.UpdateStaffDetailsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddCategoryResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
@@ -13,10 +14,12 @@ import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.UpdateStaffDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,5 +72,16 @@ public class BranchManagerController {
     public ResponseEntity<AssignmentResponseDTO> temporaryAssignment(@RequestBody @Valid AssignmentRequestDTO request) {
         return ResponseEntity.accepted().body(managerService.temporaryAssignment(request));
     }
+
+    @PostMapping("/update-staff-details")
+    public ResponseEntity<UpdateStaffDetailsResponseDTO> updateStaffDetails(@RequestBody @Valid UpdateStaffDetailsRequestDTO request) {
+        return ResponseEntity.ok(managerService.updateStaffDetails(request));
+    }
+
+    @DeleteMapping("/delete-staff/{staffId}")
+    public String deleteStaff(@PathVariable(name = "staffId") Long staffId) {
+        return managerService.deleteStaffById(staffId);
+    }
+
 
 }

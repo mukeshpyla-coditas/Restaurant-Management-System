@@ -1,5 +1,6 @@
 package com.mukesh.restaurantManagementSystem.config;
 
+import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.filter.JwtFilter;
 import com.mukesh.restaurantManagementSystem.service.implementations.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtFilter jwtFilter) {
         httpSecurity.csrf(csrf -> csrf.disable());
         httpSecurity.authorizeHttpRequests(auth ->
-            auth.requestMatchers("/v1/application-owner/**", "/v1/restaurant-owner/**").permitAll()
+            auth
+                    .requestMatchers("/v1/application-owner/**").hasRole(Role.APPLICATION_OWNER.toString())
+                    .requestMatchers("/v1/restaurant-owner/**").hasRole(Role.RESTAURANT_OWNER.toString())
+                    //.requestMatchers("/v1/branch-manager/**").hasAnyRole(Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
+                    .requestMatchers("/v1/branch-manager/register/**", "/v1/auth/**", "/v1/refresh-token/**").permitAll()
+                    .anyRequest().authenticated()
         );
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

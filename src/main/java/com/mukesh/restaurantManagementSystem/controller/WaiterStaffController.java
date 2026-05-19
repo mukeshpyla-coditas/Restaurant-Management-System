@@ -1,8 +1,10 @@
 package com.mukesh.restaurantManagementSystem.controller;
 
 import com.mukesh.restaurantManagementSystem.dto.request.AddItemsToExistingOrderRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.CancelOrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.OrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddItemsToExistingOrderResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.CancelOrderItemResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.OrderItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ViewMenuResponseDTO;
 import com.mukesh.restaurantManagementSystem.service.interfaces.WaiterStaffService;
@@ -42,5 +44,10 @@ public class WaiterStaffController {
     @PostMapping("/add-items")
     public ResponseEntity<AddItemsToExistingOrderResponseDTO> addItemsToExistingOrder(@RequestBody @Valid AddItemsToExistingOrderRequestDTO request) {
         return ResponseEntity.ok(waiterStaffService.addItemsToExistingOrder(request));
+    }
+
+    @PostMapping("/cancel-item")
+    public ResponseEntity<CancelOrderItemResponseDTO> cancelOrderItem(@RequestBody @Valid CancelOrderItemsRequestDTO request) {
+        return ResponseEntity.ok(waiterStaffService.cancelOrderItems(request));
     }
 }

@@ -48,8 +48,8 @@ public class Staff {
     @OneToMany(mappedBy = "waiterStaff")
     private List<Orders> ordersList;
 
-    @OneToMany(mappedBy = "assignedWaiter")
-    private List<RestaurantTables> assignedTables;
+    @OneToMany(mappedBy = "waiter")
+    private List<TableAssignments> assignedTables;
 
     @OneToMany(mappedBy = "stockManagementStaff")
     private List<PurchaseBills> purchaseBillsList;

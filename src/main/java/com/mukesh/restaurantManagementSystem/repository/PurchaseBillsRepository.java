@@ -10,9 +10,9 @@ import java.time.LocalDate;
 @Repository
 public interface PurchaseBillsRepository extends JpaRepository<PurchaseBills, Long> {
     @Query("""
-        SELECT COALESCE(SUM(p.purchaseAmount), 0)
+        SELECT COALESCE(SUM(p.totalPurchaseAmount), 0)
         FROM PurchaseBills p
-        WHERE p.staff.branch.id = :branchId
+        WHERE p.stockManagementStaff.branch.id = :branchId
         AND p.purchaseDate = :date
     """)
     Double getDailyExpenditure(Long branchId, LocalDate date);

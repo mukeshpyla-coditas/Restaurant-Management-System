@@ -16,8 +16,8 @@ public interface DailyReportRepository extends JpaRepository<DailyReports, Long>
         COALESCE(SUM(b.totalExpenditure), 0) AS totalExpenditure,
         COALESCE(SUM(b.totalOrders), 0) AS totalOrders,
         COALESCE(SUM(b.totalProfit), 0) AS totalProfit
-        FROM DailyReports WHERE branchId = :branchId AND
-        reportDate BETWEEN :from AND :to
+        FROM DailyReports b WHERE b.branchId = :branchId AND
+        b.reportDate BETWEEN :from AND :to
     """)
     ReportResponseDTO findReportsBetweenFromAndTo(Long branchId, LocalDate from, LocalDate to);
 }

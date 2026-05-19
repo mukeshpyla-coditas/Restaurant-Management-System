@@ -6,6 +6,7 @@ import com.mukesh.restaurantManagementSystem.dto.request.AddStaffRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AddTableRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.AssignmentRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.ManagerRegisterRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.UpdateStaffDetailsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddCategoryResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
@@ -13,6 +14,7 @@ import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.UpdateStaffDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.FoodItems;
 import com.mukesh.restaurantManagementSystem.entity.Managers;
@@ -22,6 +24,7 @@ import com.mukesh.restaurantManagementSystem.entity.RestaurantTables;
 import com.mukesh.restaurantManagementSystem.entity.Staff;
 import com.mukesh.restaurantManagementSystem.entity.TableAssignments;
 import com.mukesh.restaurantManagementSystem.entity.Users;
+import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
 import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.enums.TableStatus;
 import com.mukesh.restaurantManagementSystem.exceptions.BadRequestException;
@@ -30,6 +33,7 @@ import com.mukesh.restaurantManagementSystem.exceptions.CreationException;
 import com.mukesh.restaurantManagementSystem.exceptions.EntityNotFoundException;
 import com.mukesh.restaurantManagementSystem.repository.BranchRepository;
 import com.mukesh.restaurantManagementSystem.repository.FoodItemsRepository;
+import com.mukesh.restaurantManagementSystem.repository.InvitationRepository;
 import com.mukesh.restaurantManagementSystem.repository.ManagerRepository;
 import com.mukesh.restaurantManagementSystem.repository.MenuCategoryRepository;
 import com.mukesh.restaurantManagementSystem.repository.MenuRepository;
@@ -63,6 +67,7 @@ public class ManagerServiceImpl implements ManagerService {
     private final TablesRepository tablesRepository;
     private final FoodItemsRepository foodItemsRepository;
     private final ManagerRepository managerRepository;
+    private final InvitationRepository invitationRepository;
     private final MenuCategoryRepository categoryRepository;
     private final TableAssignmentsRepository tableAssignmentsRepository;
 
@@ -71,6 +76,8 @@ public class ManagerServiceImpl implements ManagerService {
         if(!commonService.isInviteTokenValid(inviteCode)) {
             throw new CodeExpiredException("InviteCode is expired. Please wait for the next invite mail.");
         }
+
+        invitationRepository.findByInviteCode(inviteCode).setInviteStatus(InviteStatus.ACCEPTED);
 
         Users newUser = Users.builder()
                 .fullName(request.getFullName())
@@ -172,6 +179,7 @@ public class ManagerServiceImpl implements ManagerService {
         log.info("Menu has been created for branch: {}", existingBranch.getBranchName());
 
         existingBranch.setMenu(menu);
+        branchRepository.save(existingBranch);
 
         return MenuCreationResponseDTO.builder()
                 .branchId(existingBranch.getId())
@@ -274,8 +282,8 @@ public class ManagerServiceImpl implements ManagerService {
         Map<Long, List<Integer>> assignments = new HashMap<>();
         List<Integer> tablesList = new ArrayList<>();
 
-        for(Long tableId : request.getSelectedTables()) {
-            RestaurantTables requestedTable = tablesRepository.findById(tableId)
+        for(Integer tableId : request.getSelectedTables()) {
+            RestaurantTables requestedTable = tablesRepository.findByTableNumber(tableId)
                     .orElseThrow(() -> new EntityNotFoundException("Specified tableId does not exist. Please do re-verify the selected table IDs."));
             TableAssignments newAssignment = TableAssignments.builder()
                     .temporaryAssignment(false)
@@ -310,8 +318,8 @@ public class ManagerServiceImpl implements ManagerService {
         Map<Long, List<Integer>> assignments = new HashMap<>();
         List<Integer> tablesList = new ArrayList<>();
 
-        for(Long tableId : request.getSelectedTables()) {
-            RestaurantTables requestedTable = tablesRepository.findById(tableId)
+        for(Integer tableId : request.getSelectedTables()) {
+            RestaurantTables requestedTable = tablesRepository.findByTableNumber(tableId)
                     .orElseThrow(() -> new EntityNotFoundException("Specified tableId does not exist. Please do re-verify the selected table IDs."));
             TableAssignments newAssignment = TableAssignments.builder()
                     .temporaryAssignment(true)
@@ -335,6 +343,52 @@ public class ManagerServiceImpl implements ManagerService {
                 .assignedTables(assignments)
                 .message("The waiter with ID: " + waiterStaff.getId() + " is assigned to the mentioned tables.")
                 .build();
+    }
+
+    @Override
+    public UpdateStaffDetailsResponseDTO updateStaffDetails(UpdateStaffDetailsRequestDTO request) {
+        Staff existingStaff = staffRepository.findById(request.getStaffId())
+                .orElseThrow(() -> new EntityNotFoundException("Specified staff does not exist"));
+
+        Users editUserDetails = Users.builder()
+                .fullName(request.getFullName())
+                .gender(commonService.checkGender(request.getGender()))
+                .email(request.getEmail())
+                .isActive(existingStaff.getUser().getIsActive())
+                .aadharNumber(request.getAadharNumber())
+                .contactNumber(request.getContactNumber())
+                .joinedAt(existingStaff.getUser().getJoinedAt())
+                .photoUrl(request.getPhotoUrl())
+                .build();
+
+        usersRepository.save(editUserDetails);
+        existingStaff.setUser(editUserDetails);
+        staffRepository.save(existingStaff);
+
+        return UpdateStaffDetailsResponseDTO.builder()
+                .username(existingStaff.getUser().getUsername())
+                .email(existingStaff.getUser().getEmail())
+                .gender(existingStaff.getUser().getGender().toString())
+                .aadharNumber(existingStaff.getUser().getAadharNumber())
+                .photoUrl(existingStaff.getUser().getPhotoUrl())
+                .fullName(existingStaff.getUser().getFullName())
+                .staffType(existingStaff.getUser().getRole().toString())
+                .build();
+    }
+
+    @Override
+    public String deleteStaffById(Long staffId) {
+        Staff existingStaff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new EntityNotFoundException("Specified staffId does not exist. Please re-confirm the entered staffId"));
+
+        Users existingUser = existingStaff.getUser();
+
+        usersRepository.delete(existingUser);
+        log.info("UserDetails is successfully deleted.");
+        staffRepository.delete(existingStaff);
+        log.info("StaffDetails is successfully deleted.");
+
+        return "Staff with staffId: " + existingStaff.getId() + " is successfully deleted by: " + getManager().getUser().getFullName();
     }
 
     public Managers getManager() {

@@ -37,7 +37,7 @@ public class OrderItems {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private FoodItems item;
 
