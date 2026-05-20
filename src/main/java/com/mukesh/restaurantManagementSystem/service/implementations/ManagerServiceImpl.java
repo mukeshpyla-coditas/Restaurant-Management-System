@@ -154,6 +154,8 @@ public class ManagerServiceImpl implements ManagerService {
                 .user(newUser)
                 .build();
 
+        log.info("Created the new Staff instance. StaffId: {}", staff.getId());
+
         staffRepository.save(staff);
         existingManager.getStaffList().add(staff);
 
@@ -202,6 +204,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .build();
 
         categoryRepository.save(newCategory);
+        log.info("{} created a new category named {}", existingManager.getUser().getFullName(), newCategory.getCategoryName());
 
         return AddCategoryResponseDTO.builder()
                 .categoryName(newCategory.getCategoryName())
@@ -219,7 +222,6 @@ public class ManagerServiceImpl implements ManagerService {
 
         MenuCategory existingCategory = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified category does not exist."));
-
         FoodItems foodItem = FoodItems.builder()
                 .itemName(request.getItemName())
                 .itemDescription(request.getItemDescription())
@@ -280,6 +282,7 @@ public class ManagerServiceImpl implements ManagerService {
         Staff waiterStaff = staffRepository.findById(request.getWaiterId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified staff does not found. Please re-confirm the staffId."));
         if(!waiterStaff.getUser().getRole().equals(Role.WAITER_STAFF)) {
+            log.error("Exception occurred: Specified staff is not waiter-staff. Tables can only be assigned to WAITER_STAFF. Please re-confirm the staffId.");
             throw new BadRequestException("Specified staff is not waiter-staff. Tables can only be assigned to WAITER_STAFF. Please re-confirm the staffId.");
         }
 
@@ -305,6 +308,7 @@ public class ManagerServiceImpl implements ManagerService {
         }
 
         assignments.put(waiterStaff.getId(), tablesList);
+        log.info("Waiter {} is assigned.", waiterStaff.getUser().getFullName());
 
         return AssignmentResponseDTO.builder()
                 .temporaryAssignment(false)
@@ -341,6 +345,7 @@ public class ManagerServiceImpl implements ManagerService {
         }
 
         assignments.put(waiterStaff.getId(), tablesList);
+        log.info("Waiter {} is temporarily assigned.", waiterStaff.getUser().getFullName());
 
         return AssignmentResponseDTO.builder()
                 .temporaryAssignment(true)
@@ -367,6 +372,8 @@ public class ManagerServiceImpl implements ManagerService {
         usersRepository.save(existingUser);
         existingStaff.setUser(existingUser);
         staffRepository.save(existingStaff);
+
+        log.info("Updated the details of {}", existingStaff.getUser().getUsername());
 
         return UpdateStaffDetailsResponseDTO.builder()
                 .username(existingStaff.getUser().getUsername())
@@ -412,6 +419,8 @@ public class ManagerServiceImpl implements ManagerService {
                     .build();
             response.add(staffDetails);
         }
+
+        log.info("Fetched all the details of the staff present in branch - {}", existingBranch.getId());
 
         return response;
     }

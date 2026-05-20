@@ -2,6 +2,7 @@ package com.mukesh.restaurantManagementSystem.entity;
 
 import com.mukesh.restaurantManagementSystem.enums.Gender;
 import com.mukesh.restaurantManagementSystem.enums.Role;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -35,6 +36,7 @@ public class Users implements UserDetails {
     private Long id;
 
     private String fullName;
+    @Column(unique = true)
     private String username;
     private String email;
     private String password;

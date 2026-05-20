@@ -41,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
                     .expirationAt(LocalDate.now().plusDays(1))
                     .build();
             refreshTokenRepository.save(refreshToken1);
+            log.info("User is successfully authenticated. Access Token and Refresh Token are issued to the user - {}", request.getUsername());
 
             return LoginResponseDTO.builder()
                     .accessToken(accessToken)

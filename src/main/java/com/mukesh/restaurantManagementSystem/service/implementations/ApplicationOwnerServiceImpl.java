@@ -1,16 +1,12 @@
 package com.mukesh.restaurantManagementSystem.service.implementations;
 
-import com.mukesh.restaurantManagementSystem.dto.request.LoginRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.FetchBranchDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.FetchRestaurantDetailsResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.LoginResponseDTO;
-import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
-import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
-import com.mukesh.restaurantManagementSystem.entity.RefreshToken;
 import com.mukesh.restaurantManagementSystem.entity.Restaurants;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
@@ -21,16 +17,11 @@ import com.mukesh.restaurantManagementSystem.repository.RefreshTokenRepository;
 import com.mukesh.restaurantManagementSystem.repository.RestaurantRepository;
 import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwnerService;
-import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
 import com.mukesh.restaurantManagementSystem.service.interfaces.RestaurantOwnerService;
 import com.mukesh.restaurantManagementSystem.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -58,8 +49,9 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
                 .orElseThrow(() -> new EntityNotFoundException("User specified does not exist"));
 
         String inviteCode = UUID.randomUUID().toString();
-        String apiCall = "/v1/restaurant-owner/register/" + inviteCode;
+        String apiCall = "/v1/auth/restaurant-owner/register/" + inviteCode;
         commonService.sendMail(request, sender, apiCall);
+        log.info("Mail has been sent to the restaurant-owner. Receiver Mail: {}", request.getReceiverEmail());
         
         Invitation invitation = Invitation.builder()
                 .inviteCode(inviteCode)
@@ -69,6 +61,7 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
                 .sentBy(sender)
                 .build();
         invitationRepository.save(invitation);
+        log.info("Saved the invite token into the DB along with the expiry.");
 
         return RestaurantOwnerInviteResponseDTO.builder()
                 .sentTo(request.getReceiverEmail())
@@ -102,40 +95,13 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
     }
 
     @Override
-    public LoginResponseDTO loginApplicationOwner(LoginRequestDTO request) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-            String accessToken = jwtUtil.generateToken(request.getUsername(), Role.APPLICATION_OWNER.toString());
-            String refreshToken = UUID.randomUUID().toString();
-            RefreshToken refreshToken1 = RefreshToken.builder()
-                    .refreshToken(refreshToken)
-                    .user(usersRepository.findByUsername(request.getUsername()).orElseThrow(() -> new EntityNotFoundException("Specified user is not found.")))
-                    .createdAt(LocalDate.now())
-                    .expirationAt(LocalDate.now().plusDays(1))
-                    .build();
-            refreshTokenRepository.save(refreshToken1);
-
-            return LoginResponseDTO.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .message("The token will be active for next 10min.")
-                    .build();
-        } catch (Exception exception) {
-            log.error("Exception occurred: {}", exception.getMessage());
-        }
-
-        return null;
-    }
-
-    @Override
     public FetchRestaurantDetailsResponseDTO fetchRestaurantDetails(Long restaurantId, Integer size, Integer page) {
         Restaurants requestedRestaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Specified restaurant is not found. Please re-confirm the restaurant ID."));
 
         List<FetchBranchDetailsResponseDTO> branchDetails = restaurantOwnerService.fetchBranchDetails(restaurantId, size, page);
 
+        log.info("Fetched the details of every branch, of the specified restaurantId - {}", restaurantId);
         return FetchRestaurantDetailsResponseDTO.builder()
                 .ownerName(requestedRestaurant.getOwner().getOwner().getFullName())
                 .restaurantId(requestedRestaurant.getId())

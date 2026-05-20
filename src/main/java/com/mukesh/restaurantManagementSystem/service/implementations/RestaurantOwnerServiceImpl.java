@@ -152,7 +152,7 @@ public class RestaurantOwnerServiceImpl implements RestaurantOwnerService {
         Owners sender = restaurantOwnerRepository.findById(request.getSenderId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified user does not exist. Please re-verify the senderId."));
         String inviteCode = UUID.randomUUID().toString();
-        String apiCall = "/v1/branch-manager/register/" + inviteCode;
+        String apiCall = "/v1/auth/branch-manager/register/" + inviteCode;
         commonService.sendMail(request, sender.getOwner(), apiCall);
         log.info("Mail is successfully sent to: {}", request.getReceiverMail());
 

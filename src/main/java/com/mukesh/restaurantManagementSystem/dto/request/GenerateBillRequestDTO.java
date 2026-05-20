@@ -8,5 +8,6 @@ import lombok.Setter;
 public class GenerateBillRequestDTO {
     private Long customerId;
     private Integer tableNumber;
+    private Double discount;
 }
 

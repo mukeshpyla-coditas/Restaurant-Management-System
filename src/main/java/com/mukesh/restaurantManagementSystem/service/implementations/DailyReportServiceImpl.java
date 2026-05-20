@@ -76,6 +76,8 @@ public class DailyReportServiceImpl implements DailyReportService {
         if(response.getTotalIncome() > 0.0) {
             profitPercentage = (response.getTotalProfit() / response.getTotalIncome()) * 100.0;
         }
+
+        log.info("Response of reports from {} to {} is generated and sent", request.getFrom(), request.getTo());
         return ViewReportsResponseDTO.builder()
                 .branchId(request.getBranchId())
                 .totalIncome(response.getTotalIncome())

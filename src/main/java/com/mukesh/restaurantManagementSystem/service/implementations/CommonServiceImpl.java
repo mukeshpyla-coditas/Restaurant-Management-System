@@ -12,6 +12,7 @@ import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.exceptions.InvalidTypeException;
 import com.mukesh.restaurantManagementSystem.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommonServiceImpl {
     private final JavaMailSender javaMailSender;
     private final InvitationRepository invitationRepository;
@@ -54,8 +56,10 @@ public class CommonServiceImpl {
         simpleMailMessage.setTo(request.getReceiverEmail());
         simpleMailMessage.setSubject("Invite to onboard onto the Management Application");
         simpleMailMessage.setFrom(sender.getEmail());
-        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nPlease NOTE that the link will be active until next 12hrs. Please do register before the expiry. Thank you!");
+        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nPlease NOTE that the link will be active until next 24hrs. Please do register before the expiry. Thank you!");
         javaMailSender.send(simpleMailMessage);
+
+        log.info("Mail has been sent from(Application-Owner) {} to(Restaurant-Owner) {}", sender.getEmail(), request.getReceiverEmail());
     }
 
     public void sendMail(BranchManagerInviteRequestDTO request, Users sender, String apiCall) {
@@ -64,8 +68,10 @@ public class CommonServiceImpl {
         simpleMailMessage.setTo(request.getReceiverMail());
         simpleMailMessage.setSubject("Invite to onboard onto the Management Application");
         simpleMailMessage.setFrom(sender.getEmail());
-        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nBranchId: " + request.getBranchId() + "\nPlease NOTE that the link will be active until next 12hrs. Please do register before the expiry. Thank you!");
+        simpleMailMessage.setText("Link: " + restaurantOwnerRegistrationLink +"\nBranchId: " + request.getBranchId() + "\nPlease NOTE that the link will be active until next 24hrs. Please do register before the expiry. Thank you!");
         javaMailSender.send(simpleMailMessage);
+
+        log.info("Mail has been sent from(Restaurant-Owner) {} to(Branch-Manager) {}", sender.getEmail(), request.getReceiverMail());
     }
 
     public void sendMail(DailyReports request, String receiverMail) {
@@ -78,6 +84,8 @@ public class CommonServiceImpl {
         + "\nProfitPercentage: " + request.getProfitPercentage() + "\nReportDate: " + request.getReportDate()
         + "\n\nThis is the daily report of branch: " + request.getBranchId());
         javaMailSender.send(simpleMailMessage);
+
+        log.info("Mail of DailyReport has been sent to {}", receiverMail);
     }
 
     public boolean isInviteTokenValid(String inviteToken) {

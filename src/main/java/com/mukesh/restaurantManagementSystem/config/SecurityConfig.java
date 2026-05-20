@@ -35,9 +35,13 @@ public class SecurityConfig {
             auth
                     .requestMatchers("/v1/application-owner/**").hasRole(Role.APPLICATION_OWNER.toString())
                     .requestMatchers("/v1/restaurant-owner/**").hasRole(Role.RESTAURANT_OWNER.toString())
-                    //.requestMatchers("/v1/branch-manager/**").hasAnyRole(Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
-                    .requestMatchers("/v1/branch-manager/register/**", "/v1/auth/**", "/v1/refresh-token/**").permitAll()
+                    .requestMatchers("/v1/branch-manager/**").hasAnyRole(Role.RESTAURANT_OWNER.toString(), Role.BRANCH_MANAGER.toString())
+                    .requestMatchers("/v1/waiter-staff/**").hasAnyRole(Role.WAITER_STAFF.toString(), Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
+                    .requestMatchers("/v1/cokking-staff/**").hasAnyRole(Role.COOKING_STAFF.toString(), Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
+                    .requestMatchers("/v1/stock-management-staff/**").hasAnyRole(Role.STOCK_MANAGEMENT_STAFF.toString(), Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
+                    .requestMatchers("/v1/reports").hasAnyRole(Role.APPLICATION_OWNER.toString(), Role.RESTAURANT_OWNER.toString(), Role.BRANCH_MANAGER.toString())
                     .requestMatchers(PUBLIC_URLS).permitAll()
+                    .requestMatchers("/v1/auth/**", "/v1/refresh-token/**").permitAll()
                     .anyRequest().authenticated()
         );
         httpSecurity.httpBasic(Customizer.withDefaults());

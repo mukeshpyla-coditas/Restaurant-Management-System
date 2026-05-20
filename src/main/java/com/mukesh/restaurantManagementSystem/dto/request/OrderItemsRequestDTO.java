@@ -18,5 +18,5 @@ public class OrderItemsRequestDTO {
     @NotNull
     Map<Long, Integer> foodItems;
     @NotNull
-    private Long tableNumber;
+    private Integer tableNumber;
 }

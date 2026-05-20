@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -35,7 +36,7 @@ public class Menu {
     private Branches branch;
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<FoodItems> itemsList;
+    private List<FoodItems> itemsList = new ArrayList<>();
 
     private LocalDate addedAt;
 }

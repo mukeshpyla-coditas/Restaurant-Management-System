@@ -53,6 +53,8 @@ public class Orders {
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private RestaurantTables restaurantTable;
 
+    private Double discount;
+
     private Double totalAmount;
 
     private Double taxPercentage;

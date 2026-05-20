@@ -13,6 +13,7 @@ import com.mukesh.restaurantManagementSystem.repository.StaffRepository;
 import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.StockManagementStaffService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StockManagementStaffServiceImpl implements StockManagementStaffService {
     private final PurchaseBillsRepository purchaseBillsRepository;
     private final UsersRepository usersRepository;
@@ -40,6 +42,7 @@ public class StockManagementStaffServiceImpl implements StockManagementStaffServ
                 .build();
 
         purchaseBillsRepository.save(purchaseBills);
+        log.info("Purchase Bill has been uploaded by: {}", existingStockManagementStaff.getUser().getFullName());
 
         return PurchaseBillUploadResponseDTO.builder()
                 .uploadedBy(existingStockManagementStaff.getUser().getUsername())
