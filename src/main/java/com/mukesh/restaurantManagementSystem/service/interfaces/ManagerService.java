@@ -12,9 +12,12 @@ import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDT
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchStaffDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.UpdateStaffDetailsResponseDTO;
+
+import java.util.List;
 
 public interface ManagerService {
     ManagerRegisterResponseDTO registerManager(String inviteToken, ManagerRegisterRequestDTO request);
@@ -27,4 +30,5 @@ public interface ManagerService {
     AssignmentResponseDTO temporaryAssignment(AssignmentRequestDTO request);
     UpdateStaffDetailsResponseDTO updateStaffDetails(UpdateStaffDetailsRequestDTO request);
     String deleteStaffById(Long staffId);
+    List<FetchStaffDetailsResponseDTO> fetchStaffDetails(Long branchId, Integer size, Integer page);
 }

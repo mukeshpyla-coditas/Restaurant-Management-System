@@ -3,28 +3,39 @@ package com.mukesh.restaurantManagementSystem.service.implementations;
 import com.mukesh.restaurantManagementSystem.dto.request.LoginRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantOwnerInviteRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchBranchDetailsResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchRestaurantDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.LoginResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ApplicationOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerInviteResponseDTO;
+import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
 import com.mukesh.restaurantManagementSystem.entity.RefreshToken;
+import com.mukesh.restaurantManagementSystem.entity.Restaurants;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
 import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.exceptions.EntityNotFoundException;
 import com.mukesh.restaurantManagementSystem.repository.InvitationRepository;
 import com.mukesh.restaurantManagementSystem.repository.RefreshTokenRepository;
+import com.mukesh.restaurantManagementSystem.repository.RestaurantRepository;
 import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ApplicationOwnerService;
+import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
+import com.mukesh.restaurantManagementSystem.service.interfaces.RestaurantOwnerService;
 import com.mukesh.restaurantManagementSystem.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,7 +44,9 @@ import java.util.UUID;
 public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
     private final JwtUtil jwtUtil;
     private final UsersRepository usersRepository;
+    private final RestaurantRepository restaurantRepository;
     private final CommonServiceImpl commonService;
+    private final RestaurantOwnerService restaurantOwnerService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final InvitationRepository invitationRepository;
@@ -114,5 +127,22 @@ public class ApplicationOwnerServiceImpl implements ApplicationOwnerService {
         }
 
         return null;
+    }
+
+    @Override
+    public FetchRestaurantDetailsResponseDTO fetchRestaurantDetails(Long restaurantId, Integer size, Integer page) {
+        Restaurants requestedRestaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Specified restaurant is not found. Please re-confirm the restaurant ID."));
+
+        List<FetchBranchDetailsResponseDTO> branchDetails = restaurantOwnerService.fetchBranchDetails(restaurantId, size, page);
+
+        return FetchRestaurantDetailsResponseDTO.builder()
+                .ownerName(requestedRestaurant.getOwner().getOwner().getFullName())
+                .restaurantId(requestedRestaurant.getId())
+                .restaurantName(requestedRestaurant.getRestaurantName())
+                .restaurantCreatedAt(requestedRestaurant.getCreatedAt())
+                .branchDetails(branchDetails)
+                .build();
+
     }
 }

@@ -12,6 +12,7 @@ import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDT
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchStaffDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.UpdateStaffDetailsResponseDTO;
@@ -44,6 +45,9 @@ import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -350,19 +354,18 @@ public class ManagerServiceImpl implements ManagerService {
         Staff existingStaff = staffRepository.findById(request.getStaffId())
                 .orElseThrow(() -> new EntityNotFoundException("Specified staff does not exist"));
 
-        Users editUserDetails = Users.builder()
-                .fullName(request.getFullName())
-                .gender(commonService.checkGender(request.getGender()))
-                .email(request.getEmail())
-                .isActive(existingStaff.getUser().getIsActive())
-                .aadharNumber(request.getAadharNumber())
-                .contactNumber(request.getContactNumber())
-                .joinedAt(existingStaff.getUser().getJoinedAt())
-                .photoUrl(request.getPhotoUrl())
-                .build();
+        Users existingUser = existingStaff.getUser();
+        existingUser.setFullName(request.getFullName());
+        existingUser.setUsername(request.getUsername());
+        existingUser.setRole(commonService.checkStaffType(request.getStaffType()));
+        existingUser.setGender(commonService.checkGender(request.getGender()));
+        existingUser.setContactNumber(request.getContactNumber());
+        existingUser.setAadharNumber(request.getAadharNumber());
+        existingUser.setEmail(request.getEmail());
+        existingUser.setPhotoUrl(request.getPhotoUrl());
 
-        usersRepository.save(editUserDetails);
-        existingStaff.setUser(editUserDetails);
+        usersRepository.save(existingUser);
+        existingStaff.setUser(existingUser);
         staffRepository.save(existingStaff);
 
         return UpdateStaffDetailsResponseDTO.builder()
@@ -389,6 +392,28 @@ public class ManagerServiceImpl implements ManagerService {
         log.info("StaffDetails is successfully deleted.");
 
         return "Staff with staffId: " + existingStaff.getId() + " is successfully deleted by: " + getManager().getUser().getFullName();
+    }
+
+    @Override
+    public List<FetchStaffDetailsResponseDTO> fetchStaffDetails(Long branchId, Integer size, Integer page) {
+        Pageable pageable = PageRequest.of(page, size);
+        Branches existingBranch = branchRepository.findById(branchId).orElseThrow(() -> new EntityNotFoundException("Specified branch does not exist."));
+        Page<Staff> allStaffDetails = staffRepository.findAllByBranch(existingBranch, pageable);
+        List<Staff> listOfStaff = allStaffDetails.getContent();
+
+        List<FetchStaffDetailsResponseDTO> response = new ArrayList<>();
+        for(Staff staff : listOfStaff) {
+            Users existingUser = staff.getUser();
+            FetchStaffDetailsResponseDTO staffDetails = FetchStaffDetailsResponseDTO.builder()
+                    .staffName(existingUser.getFullName())
+                    .staffId(staff.getId())
+                    .staffType(existingUser.getRole().toString())
+                    .isPresent(staff.getIsActive())
+                    .build();
+            response.add(staffDetails);
+        }
+
+        return response;
     }
 
     public Managers getManager() {

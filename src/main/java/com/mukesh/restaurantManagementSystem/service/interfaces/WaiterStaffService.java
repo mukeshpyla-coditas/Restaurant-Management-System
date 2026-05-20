@@ -2,9 +2,11 @@ package com.mukesh.restaurantManagementSystem.service.interfaces;
 
 import com.mukesh.restaurantManagementSystem.dto.request.AddItemsToExistingOrderRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.CancelOrderItemsRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.GenerateBillRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.OrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddItemsToExistingOrderResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.CancelOrderItemResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.GenerateBillResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.OrderItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ViewMenuResponseDTO;
 
@@ -17,4 +19,5 @@ public interface WaiterStaffService {
     OrderItemsResponseDTO orderItems(OrderItemsRequestDTO request);
     AddItemsToExistingOrderResponseDTO addItemsToExistingOrder(AddItemsToExistingOrderRequestDTO request);
     CancelOrderItemResponseDTO cancelOrderItems(CancelOrderItemsRequestDTO request);
+    GenerateBillResponseDTO generateBill(GenerateBillRequestDTO request);
 }

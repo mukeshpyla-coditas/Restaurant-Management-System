@@ -12,6 +12,7 @@ import com.mukesh.restaurantManagementSystem.dto.response.AddFoodItemsResponseDT
 import com.mukesh.restaurantManagementSystem.dto.response.AddStaffResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddTableResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AssignmentResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchStaffDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ManagerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.MenuCreationResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.UpdateStaffDetailsResponseDTO;
@@ -20,11 +21,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/branch-manager")
@@ -81,6 +86,15 @@ public class BranchManagerController {
     @DeleteMapping("/delete-staff/{staffId}")
     public String deleteStaff(@PathVariable(name = "staffId") Long staffId) {
         return managerService.deleteStaffById(staffId);
+    }
+
+    @GetMapping("/fetch-details/{branchId}")
+    public ResponseEntity<List<FetchStaffDetailsResponseDTO>> fetchStaffDetails(
+            @PathVariable(name = "branchId") Long branchId,
+            @RequestParam(name = "size") Integer size,
+            @RequestParam(name = "page") Integer page
+    ) {
+        return ResponseEntity.ok(managerService.fetchStaffDetails(branchId, size, page));
     }
 
 

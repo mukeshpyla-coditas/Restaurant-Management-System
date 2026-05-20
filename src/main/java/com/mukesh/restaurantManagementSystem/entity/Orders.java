@@ -1,6 +1,5 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
-import com.mukesh.restaurantManagementSystem.enums.OrderStatus;
 import com.mukesh.restaurantManagementSystem.enums.PaymentStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,4 +52,10 @@ public class Orders {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private RestaurantTables restaurantTable;
+
+    private Double totalAmount;
+
+    private Double taxPercentage;
+
+    private Double finalAmountIncludingTax;
 }

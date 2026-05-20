@@ -6,11 +6,11 @@ import com.mukesh.restaurantManagementSystem.dto.request.RegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.RestaurantRegisterRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchManagerInviteResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.BranchRegisterResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.FetchBranchDetailsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantOwnerRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.RestaurantRegisterResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.Invitation;
-import com.mukesh.restaurantManagementSystem.entity.Managers;
 import com.mukesh.restaurantManagementSystem.entity.Owners;
 import com.mukesh.restaurantManagementSystem.entity.Restaurants;
 import com.mukesh.restaurantManagementSystem.entity.Users;
@@ -18,18 +18,26 @@ import com.mukesh.restaurantManagementSystem.enums.InviteStatus;
 import com.mukesh.restaurantManagementSystem.enums.Role;
 import com.mukesh.restaurantManagementSystem.exceptions.CodeExpiredException;
 import com.mukesh.restaurantManagementSystem.exceptions.EntityNotFoundException;
+import com.mukesh.restaurantManagementSystem.exceptions.InvalidRequestException;
 import com.mukesh.restaurantManagementSystem.repository.BranchRepository;
 import com.mukesh.restaurantManagementSystem.repository.InvitationRepository;
 import com.mukesh.restaurantManagementSystem.repository.RestaurantOwnerRepository;
 import com.mukesh.restaurantManagementSystem.repository.RestaurantRepository;
 import com.mukesh.restaurantManagementSystem.repository.UsersRepository;
+import com.mukesh.restaurantManagementSystem.service.interfaces.ManagerService;
 import com.mukesh.restaurantManagementSystem.service.interfaces.RestaurantOwnerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,6 +48,7 @@ public class RestaurantOwnerServiceImpl implements RestaurantOwnerService {
     private final CommonServiceImpl commonService;
     private final UsersRepository usersRepository;
     private final BranchRepository branchRepository;
+    private final ManagerService managerService;
     private final InvitationRepository invitationRepository;
     private final RestaurantRepository restaurantRepository;
     private final RestaurantOwnerRepository restaurantOwnerRepository;
@@ -162,5 +171,40 @@ public class RestaurantOwnerServiceImpl implements RestaurantOwnerService {
                 .sentTo(request.getReceiverMail())
                 .message("Invite is successfully sent to the specified email. You can keep a track of invites through the 'invites' tab.")
                 .build();
+    }
+
+    @Override
+    public List<FetchBranchDetailsResponseDTO> fetchBranchDetails(Long restaurantId, Integer size, Integer page) {
+        Restaurants existingRestaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Specified restaurant does not exist. Please re-confirm the restaurantId."));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Branches> branchesPage = branchRepository.findByRestaurant(existingRestaurant, pageable);
+        List<Branches> branchesList = branchesPage.getContent();
+        List<FetchBranchDetailsResponseDTO> response = new ArrayList<>();
+
+        for(Branches branch : branchesList) {
+            FetchBranchDetailsResponseDTO branchDetails = FetchBranchDetailsResponseDTO.builder()
+                    .branchId(branch.getId())
+                    .branchName(branch.getBranchName())
+                    .branchAddress(branch.getAddress())
+                    .managerId(branch.getManager().getId())
+                    .managerName(branch.getManager().getUser().getFullName())
+                    .contactNumber(branch.getContactNumber())
+                    .createdAt(branch.getCreatedAt())
+                    .seatingCapacity(branch.getSeatingCapacity())
+                    .staffDetails(managerService.fetchStaffDetails(branch.getId(), size, page))
+                    .build();
+
+            response.add(branchDetails);
+        }
+
+        return response;
+    }
+
+    public Owners getOwner() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users existingUser = usersRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("Specified user does not exist."));
+        return restaurantOwnerRepository.findByOwner(existingUser);
     }
 }

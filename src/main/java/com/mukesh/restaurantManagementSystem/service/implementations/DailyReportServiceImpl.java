@@ -7,9 +7,9 @@ import com.mukesh.restaurantManagementSystem.entity.Branches;
 import com.mukesh.restaurantManagementSystem.entity.DailyReports;
 import com.mukesh.restaurantManagementSystem.entity.Managers;
 import com.mukesh.restaurantManagementSystem.entity.Owners;
-import com.mukesh.restaurantManagementSystem.repository.BillsRepository;
 import com.mukesh.restaurantManagementSystem.repository.BranchRepository;
 import com.mukesh.restaurantManagementSystem.repository.DailyReportRepository;
+import com.mukesh.restaurantManagementSystem.repository.OrdersRepository;
 import com.mukesh.restaurantManagementSystem.repository.PurchaseBillsRepository;
 import com.mukesh.restaurantManagementSystem.service.interfaces.DailyReportService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DailyReportServiceImpl implements DailyReportService {
-    private final BillsRepository billsRepository;
+    private final OrdersRepository ordersRepository;
     private final PurchaseBillsRepository purchaseBillsRepository;
     private final DailyReportRepository dailyReportRepository;
     private final BranchRepository branchRepository;
@@ -37,9 +37,9 @@ public class DailyReportServiceImpl implements DailyReportService {
         List<Branches> branchesList = branchRepository.findAll();
         LocalDate yesterday = LocalDate.now().minusDays(1);
         for(Branches branch : branchesList) {
-            Double totalIncome = billsRepository.getDailyIncome(branch.getId(), yesterday);
+            Double totalIncome = ordersRepository.getDailyIncome(branch.getId(), yesterday);
             Double totalExpenditure = purchaseBillsRepository.getDailyExpenditure(branch.getId(), yesterday);
-            Integer totalOrders = billsRepository.getTotalOrders(branch.getId(), yesterday);
+            Integer totalOrders = ordersRepository.getTotalOrders(branch.getId(), yesterday);
             Double totalProfit = totalIncome - totalExpenditure;
             Double profitPercentage = 0.0;
             if(totalIncome > 0) {

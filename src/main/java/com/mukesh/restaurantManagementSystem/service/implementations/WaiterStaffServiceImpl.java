@@ -2,9 +2,11 @@ package com.mukesh.restaurantManagementSystem.service.implementations;
 
 import com.mukesh.restaurantManagementSystem.dto.request.AddItemsToExistingOrderRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.CancelOrderItemsRequestDTO;
+import com.mukesh.restaurantManagementSystem.dto.request.GenerateBillRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.request.OrderItemsRequestDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.AddItemsToExistingOrderResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.CancelOrderItemResponseDTO;
+import com.mukesh.restaurantManagementSystem.dto.response.GenerateBillResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.OrderItemsResponseDTO;
 import com.mukesh.restaurantManagementSystem.dto.response.ViewMenuResponseDTO;
 import com.mukesh.restaurantManagementSystem.entity.Customers;
@@ -18,7 +20,9 @@ import com.mukesh.restaurantManagementSystem.entity.TableAssignments;
 import com.mukesh.restaurantManagementSystem.entity.Users;
 import com.mukesh.restaurantManagementSystem.enums.OrderStatus;
 import com.mukesh.restaurantManagementSystem.enums.PaymentStatus;
+import com.mukesh.restaurantManagementSystem.enums.RestaurantType;
 import com.mukesh.restaurantManagementSystem.exceptions.EntityNotFoundException;
+import com.mukesh.restaurantManagementSystem.exceptions.InvalidRequestException;
 import com.mukesh.restaurantManagementSystem.exceptions.InvalidTypeException;
 import com.mukesh.restaurantManagementSystem.exceptions.NotAssignedException;
 import com.mukesh.restaurantManagementSystem.exceptions.SessionExpirationException;
@@ -107,6 +111,7 @@ public class WaiterStaffServiceImpl implements WaiterStaffService {
         Staff existingStaff = getWaiterStaff();
         RestaurantTables orderTable = tablesRepository.findById(request.getTableNumber())
                 .orElseThrow(() -> new EntityNotFoundException("Specified table does not exist."));
+
         Orders newOrder = Orders.builder()
                 .restaurantTable(orderTable)
                 .waiterStaff(existingStaff)
@@ -203,6 +208,45 @@ public class WaiterStaffServiceImpl implements WaiterStaffService {
         return CancelOrderItemResponseDTO.builder()
                 .remainingOrders(remainingOrderItems)
                 .message("Specified orderItem with ID: " + request.getItemId() + " is successfully cancelled. Thank you!")
+                .build();
+    }
+
+    @Override
+    public GenerateBillResponseDTO generateBill(GenerateBillRequestDTO request) {
+        Staff waiterStaff = getWaiterStaff();
+        Customers existingCustomer = customersRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new EntityNotFoundException("Specified customer does not exist."));
+        RestaurantTables existingRestaurantTable = tablesRepository.findByTableNumber(request.getTableNumber())
+                .orElseThrow(() -> new EntityNotFoundException("Specified table does not exist."));
+
+        Orders activeOrder = ordersRepository.findByCustomerAndRestaurantTable(existingCustomer, existingRestaurantTable)
+               .orElseThrow(() -> new EntityNotFoundException("There are no active orders present for specified customer and restaurant table."));
+
+        if(activeOrder.getPaymentStatus().equals(PaymentStatus.COMPLETED)) {
+            throw new InvalidRequestException("Payment for the order placed by the specified customer is already done. Please re-confirm the customerId and tableId.");
+        }
+
+        Double totalPrice = 0.0;
+        List<OrderItems> orderItemsList = activeOrder.getOrderItemsList();
+        for(OrderItems orderItem : orderItemsList) {
+            totalPrice += (orderItem.getItem().getPrice()) * orderItem.getQuantity();
+        }
+        Double taxPercentage = 0.0;
+
+        if(waiterStaff.getBranch().getRestaurant().getRestaurantType().equals(RestaurantType.GENERAL)) taxPercentage = 5.0;
+        else if(waiterStaff.getBranch().getRestaurant().getRestaurantType().equals(RestaurantType.LUXURY)) taxPercentage = 18.0;
+
+        Double totalAmount = totalPrice + (totalPrice * (taxPercentage / 100.0));
+
+        activeOrder.setPaymentStatus(PaymentStatus.COMPLETED);
+        ordersRepository.save(activeOrder);
+        log.info("Calculated the the totalAmount and taxPercentage for the order. Now, changing the status of the order to 'PAYMENT_COMPLETED'");
+
+        return GenerateBillResponseDTO.builder()
+                .ordersAmount(totalPrice)
+                .taxPercentage(taxPercentage)
+                .totalAmount(totalAmount)
+                .generatedBy(waiterStaff.getUser().getFullName())
                 .build();
     }
 

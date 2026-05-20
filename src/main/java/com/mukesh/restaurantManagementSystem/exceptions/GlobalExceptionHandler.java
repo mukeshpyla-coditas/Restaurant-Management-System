@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> errorResponse(InvalidRequestException exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage(), LocalDate.now()), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> errorResponse(MethodArgumentNotValidException exception) {
         Map<String, String> errorsMap = new HashMap<>();

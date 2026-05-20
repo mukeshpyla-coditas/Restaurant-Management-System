@@ -19,6 +19,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    protected static final String[] PUBLIC_URLS = {
+            "/api/v1/auth/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/webjars/**"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtFilter jwtFilter) {
         httpSecurity.csrf(csrf -> csrf.disable());
@@ -28,6 +37,7 @@ public class SecurityConfig {
                     .requestMatchers("/v1/restaurant-owner/**").hasRole(Role.RESTAURANT_OWNER.toString())
                     //.requestMatchers("/v1/branch-manager/**").hasAnyRole(Role.BRANCH_MANAGER.toString(), Role.RESTAURANT_OWNER.toString())
                     .requestMatchers("/v1/branch-manager/register/**", "/v1/auth/**", "/v1/refresh-token/**").permitAll()
+                    .requestMatchers(PUBLIC_URLS).permitAll()
                     .anyRequest().authenticated()
         );
         httpSecurity.httpBasic(Customizer.withDefaults());

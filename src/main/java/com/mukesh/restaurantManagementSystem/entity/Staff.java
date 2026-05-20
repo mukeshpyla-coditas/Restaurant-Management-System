@@ -1,5 +1,6 @@
 package com.mukesh.restaurantManagementSystem.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,7 +36,7 @@ public class Staff {
     @JoinColumn(name = "branch_id", referencedColumnName = "id")
     private Branches branch;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Users user;
 
     private Boolean isActive;
@@ -48,7 +49,7 @@ public class Staff {
     @OneToMany(mappedBy = "waiterStaff")
     private List<Orders> ordersList;
 
-    @OneToMany(mappedBy = "waiter")
+    @OneToMany(mappedBy = "waiter", cascade = CascadeType.ALL)
     private List<TableAssignments> assignedTables;
 
     @OneToMany(mappedBy = "stockManagementStaff")
